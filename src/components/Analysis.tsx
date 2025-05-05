@@ -205,11 +205,20 @@ export default function Analysis() {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("monthly");
   const [rawData, setRawData] = useState<Transaction[]>([]);
 
+  interface ApiTransaction {
+    id: string;
+    date: string;
+    name: string;
+    amount: number;
+    type: "income" | "expense";
+    category: Transaction["category"];
+  }
+
   useEffect(() => {
     async function load() {
       const res = await fetch("/api/sheets");
       const { transactions } = await res.json();
-      const mapped = transactions.map((t: any) => ({
+      const mapped = transactions.map((t: ApiTransaction) => ({
         id: t.id,
         date: t.date,
         description: t.name,
