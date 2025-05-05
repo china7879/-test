@@ -31,7 +31,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 
-// 1. Обновлённый тип транзакции с полем date
+
 export type Transaction = {
   id: string
   date: string
@@ -42,9 +42,8 @@ export type Transaction = {
 }
 
 export default function ExpenseTracker() {
-  // 2. Состояния
   const [transactions, setTransactions] = useState<Transaction[]>([])
-  // newTransaction теперь без id и date — мы их проставляем при отправке
+
   const [newTransaction, setNewTransaction] = useState<
     Omit<Transaction, "id" | "date">
   >({
@@ -56,10 +55,10 @@ export default function ExpenseTracker() {
   const [editTransaction, setEditTransaction] = useState<Transaction | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
-  // 3. Список категорий (без изменений)
+ 
   const categories = ["General", "Food", "Transport", "Taxes", "Others"]
 
-  // 4. Загрузка существующих транзакций из Google Sheets
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -74,21 +73,16 @@ export default function ExpenseTracker() {
     fetchData()
   }, [])
 
-  // 5. Добавление новой транзакции
   const handleAddTransaction = async () => {
     if (!newTransaction.name || newTransaction.amount <= 0) return
 
-    // — Формируем полный объект Transaction
     const transaction: Transaction = {
       ...newTransaction,
       id: Date.now().toString(),
       date: new Date().toISOString(),
     }
-
-    // — Оптимистично обновляем UI
     setTransactions([...transactions, transaction])
 
-    // — Отправляем в Google Sheets
     try {
       const res = await fetch("/api/sheets", {
         method: "POST",
@@ -96,18 +90,13 @@ export default function ExpenseTracker() {
         body: JSON.stringify(transaction),
       })
       if (!res.ok) throw new Error("Ошибка сохранения")
-      // (опционально) здесь можно проверить ответ
     } catch (err) {
       console.error("Save error:", err)
-      // В случае ошибки, можно откатить локальный стейт:
-      // setTransactions(transactions)
     }
 
-    // — Сбрасываем форму
     setNewTransaction({ name: "", type: "expense", category: "General", amount: 0 })
   }
 
-  // 6. Редактирование (локально, без синхронизации с Google Sheets)
   const handleEditTransaction = (transaction: Transaction) => {
     setEditTransaction(transaction)
     setIsEditDialogOpen(true)
@@ -121,18 +110,15 @@ export default function ExpenseTracker() {
     setEditTransaction(null)
   }
 
-  // 7. Удаление (локально)
   const handleDeleteTransaction = (id: string) => {
     setTransactions(transactions.filter(t => t.id !== id))
   }
 
-  // 8. Баланс (без изменений)
   const totalBalance = transactions.reduce(
     (acc, t) => (t.type === "income" ? acc + t.amount : acc - t.amount),
     0
   )
 
-  // 9. Разметка (без изменений)
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <h1 className="text-3xl font-bold mb-8 text-center">
@@ -140,14 +126,12 @@ export default function ExpenseTracker() {
       </h1>
 
       <div className="grid gap-8 md:grid-cols-[1fr_1.5fr]">
-        {/* Форма добавления */}
         <Card>
           <CardHeader>
             <CardTitle>Add Transaction</CardTitle>
             <CardDescription>Enter the details of your transaction</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Название */}
             <div className="space-y-2">
               <Label htmlFor="name">Transaction Name</Label>
               <Input
@@ -160,7 +144,6 @@ export default function ExpenseTracker() {
               />
             </div>
 
-            {/* Тип */}
             <div className="space-y-2">
               <Label>Transaction Type</Label>
               <RadioGroup
@@ -184,7 +167,6 @@ export default function ExpenseTracker() {
               </RadioGroup>
             </div>
 
-            {/* Категория */}
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
               <Select
@@ -206,7 +188,6 @@ export default function ExpenseTracker() {
               </Select>
             </div>
 
-            {/* Сумма */}
             <div className="space-y-2">
               <Label htmlFor="amount">Amount</Label>
               <Input
@@ -237,7 +218,6 @@ export default function ExpenseTracker() {
           </CardContent>
         </Card>
 
-        {/* История транзакций */}
         <Card>
           <CardHeader className="flex items-center justify-between">
             <div>
@@ -317,7 +297,6 @@ export default function ExpenseTracker() {
         </Card>
       </div>
 
-      {/* Диалог редактирования */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -329,7 +308,6 @@ export default function ExpenseTracker() {
 
           {editTransaction && (
             <div className="space-y-4 py-4">
-              {/* Повторяем поля формы с editTransaction */}
               <div className="space-y-2">
                 <Label htmlFor="edit-name">Transaction Name</Label>
                 <Input

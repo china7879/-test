@@ -1,12 +1,9 @@
-// Путь: src/app/api/sheets/route.ts
 
 import { NextResponse } from "next/server"
 import { google } from "googleapis"
 
-// 1) Область доступа
 const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
-// 2) JWT-клиент
 const jwt = new google.auth.JWT(
   process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
   undefined,
@@ -14,21 +11,19 @@ const jwt = new google.auth.JWT(
   SCOPES
 )
 
-// 3) Инициализируем Sheets API
 const sheets = google.sheets({ version: "v4", auth: jwt })
 
-// 4) ID таблицы из .env.local
+
 const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_ID!
 
-// 5) Имя листа (обёрнуто в кавычки для надёжности)
 const TAB = "'Лист1'"
 
-// --- GET: читаем все строки A–F ---
+
 export async function GET() {
   try {
     const resp = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${TAB}!A:F`,    // читаем все строки столбцов A–F
+      range: `${TAB}!A:F`,    
     })
 
     const rows = resp.data.values || []
@@ -48,7 +43,7 @@ export async function GET() {
   }
 }
 
-// --- POST: добавляем новую запись ---
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
@@ -71,7 +66,7 @@ export async function POST(request: Request) {
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
-      range:         `${TAB}!A:F`,  // добавляем в столбцы A–F
+      range:         `${TAB}!A:F`,  
       valueInputOption: "RAW",
       requestBody:   { values },
     })
